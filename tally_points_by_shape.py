@@ -2,7 +2,7 @@
 """
 Created on Sat Aug 10 07:10:14 2019
 
-@author: Nathalie Blume
+@author: bluenaja
 
 Description: 
     Takes an input file with the lat, lon coordinates of a number of geographic points, 
