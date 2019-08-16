@@ -29,6 +29,7 @@ Output:
 Possible enhancements:
     - Could name the shape file at the CLI rather than hardcode it. 
     - Could use geopandas data frame.
+    - Read point data by chunks. Helpful if the point data file is too large for in-memory. 
 
 """
 
@@ -62,7 +63,40 @@ def get_shapes(relative_path_and_filename):
         path = os.path.abspath(os.path.dirname(__file__))
         with open(os.path.join(path, relative_path_and_filename)) as json_file:
             d = json.load(json_file)            
-        polygons = {i['properties']['id']:Polygon(i['geometry']['coordinates'][0]) for i in d['features']} #list-comprehension syntax for dictionary
+        #polygons = {i['properties']['id']:Polygon(i['geometry']['coordinates'][0]) for i in d['features']} #list-comprehension syntax for dictionary
+        #below may be an improvement -- check to see if it runs
+        #Assume input is more general (not necessarily a Polygon). For instance it could be:
+        #        {
+        #  "type":"FeatureCollection",
+        #  "features":[
+        #    {
+        #      "type":"Feature",
+        #      "properties":{"id":"shape1"},
+        #      "geometry":{
+        #        "type":"MultiPolygon",
+        #        "coordinates":[
+        #          [[
+        #            [-118.5, 34.0],
+        #            [-117.5, 34.0],
+        #            [-117.5, 35.0],
+        #            [-118.5, 35.0],
+        #            [-118.5, 34.0]
+        #          ]],
+        #          [[
+        #            [-117.5, 34.0],
+        #            [-116.5, 34.0],
+        #            [-116.5, 35.0],
+        #            [-117.5, 35.0],
+        #            [-117.5, 34.0]
+        #          ]]
+        #        ]
+        #      }
+        #    }
+        #  ]
+        #}
+        #In such a case, use shape() fct from shapely to read in the data, like so:
+        polygons = {i['properties']['id']:shape(i['geometry']) for i in d['features']}
+        #
         flag = 1
     except:
         flag = -1
@@ -151,7 +185,10 @@ def main():
     polys, polys_flag = get_shapes(relative_path_and_filename)
     
     # Get points from CLI standard input
-    points, points_flag = get_points()
+    if polys_flag == 1:
+        points, points_flag = get_points()
+    else:
+        points_flag = 0
     
     # If all-clear
     if points_flag == 1 and polys_flag == 1:
