@@ -96,6 +96,7 @@ def get_shapes(relative_path_and_filename):
         #}
         #In such a case, use shape() fct from shapely to read in the data, like so:
         polygons = {i['properties']['id']:shape(i['geometry']) for i in d['features']}
+        #ref: https://shapely.readthedocs.io/en/stable/manual.html#shapely.geometry.shape
         #
         flag = 1
     except:
